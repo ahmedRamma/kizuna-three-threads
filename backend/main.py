@@ -1,11 +1,19 @@
+from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from backend import engine
+from backend import db, engine
 
-app = FastAPI(title="Kizuna - Batterie virtuelle d'eau")
+
+@asynccontextmanager
+async def lifespan(_):
+    db.init()
+    yield
+
+
+app = FastAPI(title="Kizuna - Batterie virtuelle d'eau", lifespan=lifespan)
 APP_DIR = Path(__file__).resolve().parent.parent / "app"
 
 
