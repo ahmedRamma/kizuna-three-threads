@@ -42,7 +42,7 @@ function header() {
 
 function render() {
   header();
-  const v = { overview, farms, aid, analysis, alerts, impact }[state.view];
+  const v = { overview, farms, market, analysis, alerts, impact }[state.view];
   $("#view").innerHTML = v();
 }
 
@@ -76,17 +76,18 @@ function overview() {
     <div class="card kpi w"><small>Autonomie de la zone</small><div class="num">${s.autonomy} h</div><small>sans plateforme : ${b.autonomy} h</small></div>
     <div class="card kpi e"><small>Risque de coupure</small><div class="num">${s.risk}/100</div><small>${s.risk_label}</small></div>
     <div class="card kpi ${dry ? "b" : "a"}"><small>Fermes à sec</small><div class="num">${dry}</div><small>sans plateforme : ${Object.keys(b.dry).length}</small></div>
-    <div class="card kpi a"><small>Entraides en cours</small><div class="num">${s.transfers.length}</div><small>échanges de cette heure</small></div>
+    <div class="card kpi a"><small>Échanges en cours</small><div class="num">${s.trades.length}</div><small>prêts d'eau de cette heure</small></div>
   </div>
   <div class="card"><h2>Décisions de l'heure</h2><p class="sub">Ce que la plateforme commande</p>${decisions()}</div>`;
 }
 
 function decisions() {
   const s = cur();
-  if (!s.log.length && !s.transfers.length) return `<p class="note">Aucune action : les cuves tiennent. La réserve de ${RES} % est conservée.</p>`;
+  if (!s.log.length && !s.trades.length && !s.repayments.length) return `<p class="note">Aucune action : les cuves tiennent. La réserve de ${RES} % est conservée.</p>`;
   const a = s.log.map((l) => `<div class="row"><b>${farmName(l[0])}</b><span class="tag p2">${l[1]}</span><span>+${l[2]} m³</span></div>`);
-  const t = s.transfers.map((x) => `<div class="row"><b>${farmName(x.from)} → ${farmName(x.to)}</b><span class="tag p3">entraide</span><span>${x.m3} m³</span></div>`);
-  return a.concat(t).join("");
+  const t = s.trades.map((x) => `<div class="row"><b>${farmName(x.from)} → ${farmName(x.to)}</b><span class="tag p3">échange × ${fmt(x.rate, 2)}</span><span>${x.m3} m³, ${x.due_m3} m³ à rendre</span></div>`);
+  const r = s.repayments.map((x) => `<div class="row"><b>${farmName(x.from)} → ${farmName(x.to)}</b><span class="tag p2">remboursement</span><span>${x.m3} m³</span></div>`);
+  return a.concat(t, r).join("");
 }
 
 function farms() {
@@ -100,12 +101,51 @@ function farms() {
   <p class="note">Priorité 1 : eau potable et bétail. Priorité 2 : cultures fragiles. Priorité 3 : arbres, plus résistants.</p>`;
 }
 
-function aid() {
-  const all = state.sim.platform.transfers.filter((t) => t.hour <= state.h);
-  const total = all.reduce((a, t) => a + t.m3, 0).toFixed(1);
-  const rows = all.slice().reverse().map((t) => `<div class="row"><div class="flow"><span>${farmName(t.from)}</span><span class="arrow">→</span><span>${farmName(t.to)}</span></div><span>${t.m3} m³</span><small>${hourLabel(t.hour)}</small></div>`).join("");
-  return `<div class="grid g3"><div class="card kpi w"><small>Eau partagée</small><div class="num">${total} m³</div></div><div class="card kpi a"><small>Échanges</small><div class="num">${all.length}</div></div><div class="card kpi e"><small>Règle</small><div class="num" style="font-size:20px">Don, jamais vente</div></div></div>
-  <div class="card"><h2>Entraide entre voisins</h2><p class="sub">Pendant une coupure, les cuves pleines aident celles qui descendent sous la réserve.</p>${rows || '<p class="note">Aucun échange pour le moment. Avancer le temps jusqu\'à une coupure.</p>'}</div>`;
+const fmt = (v, d = 1) => (+v).toFixed(d).replace(".", ",");
+const URG = { "élevée": "p1", moyenne: "p2", faible: "p3" };
+const ST = { rendue: "p3", "rendue en retard": "p2", "à rendre": "", "en retard": "p1" };
+
+function debtsAt(h) {
+  const paid = {};
+  state.sim.platform.repayments.filter((r) => r.hour <= h).forEach((r) => (paid[r.debt] = (paid[r.debt] || 0) + r.m3));
+  return state.sim.platform.ledger.filter((d) => d.hour <= h).map((d) => {
+    const left = Math.max(0, d.due_m3 - (paid[d.id] || 0));
+    const late = d.closed !== null && d.closed <= h ? d.closed > d.due_hour : h > d.due_hour;
+    const status = left <= 0.05 ? (late ? "rendue en retard" : "rendue") : late ? "en retard" : "à rendre";
+    return { ...d, left, status };
+  });
+}
+
+function market() {
+  const s = cur(), h = state.h, debts = debtsAt(h);
+  const done = state.sim.platform.trades.filter((t) => t.hour <= h);
+  const vol = done.reduce((a, t) => a + t.m3, 0);
+  const rate = vol ? done.reduce((a, t) => a + t.m3 * t.rate, 0) / vol : 0;
+  const closed = '<p class="note">Marché fermé : le courant est là, chaque ferme pompe pour elle-même. Avancer jusqu\'à une coupure.</p>';
+  const table = (head, rows, empty) => (rows ? `<table class="tbl"><tr>${head.map((x) => `<th>${x}</th>`).join("")}</tr>${rows}</table>` : `<p class="note">${empty}</p>`);
+  const offers = s.offers.map((o) => `<tr><td><b>${farmName(o.farm)}</b></td><td>${fmt(o.m3)} m³</td><td><span class="tag p3">× ${fmt(o.rate, 2)}</span></td></tr>`).join("");
+  const demands = s.demands.map((d) => `<tr><td><b>${farmName(d.farm)}</b></td><td>${fmt(d.m3)} m³</td><td><span class="tag ${URG[d.urgency]}">${d.urgency}</span><small class="muted">à sec dans ${fmt(d.hours_to_dry)} h</small></td></tr>`).join("");
+  const refused = s.refused.map((r) => `<div class="an"><b>${farmName(r.farm)} · demande refusée</b><span>${r.reason}</span></div>`).join("");
+  const trades = debts.slice().reverse().map((d) => `<tr><td><div class="flow"><span>${farmName(d.lender)}</span><span class="arrow">→</span><span>${farmName(d.borrower)}</span></div><small class="muted">${hourLabel(d.hour)}</small></td><td>${fmt(d.m3)} m³</td><td>× ${fmt(d.rate, 2)}</td><td>${fmt(d.due_m3)} m³</td><td><span class="tag ${ST[d.status]}">${d.status}</span></td></tr>`).join("");
+  const acc = state.sim.farms.map((f) => {
+    const owes = debts.filter((d) => d.borrower === f.id).reduce((a, d) => a + d.left, 0);
+    const owed = debts.filter((d) => d.lender === f.id).reduce((a, d) => a + d.left, 0);
+    const rel = s.reliability[f.id] ?? 1, b = state.sim.accounts[f.id];
+    const role = b.lent_m3 ? "prêteur" : b.borrowed_m3 ? "emprunteur" : "hors marché";
+    const color = rel >= 0.9 ? "var(--agri)" : rel >= 0.7 ? "var(--energy)" : "var(--bad)";
+    return `<tr><td><b>${f.name}</b><small class="muted">${role}</small></td><td>${owed > 0.05 ? "+" + fmt(owed) : "0"} m³</td><td>${owes > 0.05 ? "−" + fmt(owes) : "0"} m³</td>
+      <td><div class="rel"><i style="width:${rel * 100}%;background:${color}"></i></div><small class="muted">${Math.round(rel * 100)} %</small></td>
+      <td class="${b.net_gain_m3 > 0 ? "gain" : ""}">${b.net_gain_m3 > 0 ? "+" : ""}${fmt(b.net_gain_m3)} m³</td><td>${b.dry_hours_avoided} h</td></tr>`;
+  }).join("");
+  return `<div class="grid g4"><div class="card kpi w"><small>Eau échangée</small><div class="num">${fmt(vol)} m³</div><small>depuis le début</small></div><div class="card kpi a"><small>Échanges conclus</small><div class="num">${done.length}</div><small>chacun avec une dette</small></div><div class="card kpi e"><small>Taux moyen</small><div class="num">× ${fmt(rate, 2)}</div><small>m³ rendus pour 1 m³ reçu</small></div><div class="card kpi"><small>Règle</small><div class="num" style="font-size:20px;margin-top:6px">Eau contre eau</div><small>aucun prix, aucune vente</small></div></div>
+  <div class="grid" style="grid-template-columns:1fr 1fr">
+    <div class="card"><h2>Offres de prêt</h2><p class="sub">Une ferme prête seulement ce qui dépasse ses besoins jusqu'à la fin de la coupure, plus 2 h de marge. Meilleur taux en premier.</p>${s.grid ? closed : table(["Ferme", "Volume", "Taux"], offers, "Aucune ferme n'a d'excédent à cette heure.")}</div>
+    <div class="card"><h2>Demandes</h2><p class="sub">Une ferme emprunte seulement si l'eau à rendre coûte moins que la perte évitée. Plus urgent en premier.</p>${s.grid ? closed : table(["Ferme", "Volume", "Urgence"], demands, "Aucune demande à cette heure.")}${refused}</div>
+  </div>
+  <div class="card"><h2>Échanges conclus</h2><p class="sub">Chaque prêt crée une dette dans le compte d'eau. Elle est rendue en eau après la coupure, avant que l'emprunteur ne remplisse sa cuve au-delà de sa réserve.</p>${table(["Prêteur → emprunteur", "Reçu", "Taux", "À rendre", "État"], trades, "Aucun échange pour le moment. Avancer le temps jusqu'à une coupure.")}</div>
+  <div class="card"><h2>Compte d'eau et bilan de chaque ferme</h2><p class="sub">Créances et dettes à l'heure affichée. Gain net et heures à sec évitées sur 72 h, par rapport à la même plateforme sans marché (simulation).</p>
+    ${table(["Ferme", "On lui doit", "Elle doit", "Fiabilité", "Gain net 72 h", "Heures à sec évitées"], acc, "")}
+    <p class="note" style="margin-top:12px">Prêteur : il gagne la prime, l'eau rendue en plus. Emprunteur : il évite le manque d'eau, moins la prime. Une ferme qui rend en retard perd de la fiabilité et paie un taux plus élevé. Trop endettée, sa demande est refusée.</p></div>`;
 }
 
 function bars(vals, months, color, flags, unit) {
@@ -141,10 +181,11 @@ function alerts() {
 function impact() {
   const i = state.sim.impact;
   const row = (l, a, b, unit) => { const m = Math.max(a, b, 1); return `<div class="cmpbar"><span>${l}</span><div><div class="bar" style="width:${(a / m) * 100}%"></div><div class="bar g" style="width:${(b / m) * 100}%;margin-top:4px"></div></div><span>${a} / ${b} ${unit}</span></div>`; };
-  return `<div class="card hero"><h2>Avec la plateforme, ${i.reduction_pct} % d'eau manquante en moins</h2><p class="sub">Même canicule, mêmes coupures, 8 fermes, 72 h</p><div class="num">${i.saved_m3} m³</div><p class="sub">d'eau sauvés pour la zone</p></div>
-  <div class="grid g3"><div class="card kpi b"><small>Heures à sec, sans plateforme</small><div class="num">${i.dry_hours_without}</div></div><div class="card kpi a"><small>Heures à sec, avec plateforme</small><div class="num">${i.dry_hours_with}</div></div><div class="card kpi w"><small>Eau partagée entre voisins</small><div class="num">${i.transferred_m3} m³</div></div></div>
-  <div class="card"><h2>Comparaison</h2><p class="sub">Rouge : sans plateforme. Vert : avec plateforme.</p><div class="cmp">${row("Eau manquante", i.unmet_without, i.unmet_with, "m³")}${row("Heures à sec", i.dry_hours_without, i.dry_hours_with, "h")}</div>
-  <p class="note" style="margin-top:14px">Simulation : le comportement sans plateforme est une pompe qui démarre seulement sous 30 % de remplissage. Les données réelles viendront des capteurs ESP32 via l'API.</p></div>`;
+  return `<div class="card hero"><h2>Avec la plateforme, ${i.reduction_pct} % d'eau manquante en moins</h2><p class="sub">Simulation : même canicule, mêmes coupures, 8 fermes, 72 h</p><div class="num">${i.saved_m3} m³</div><p class="sub">d'eau manquante évitée pour la zone</p></div>
+  <div class="grid g4"><div class="card kpi b"><small>Heures à sec, sans plateforme</small><div class="num">${i.dry_hours_without}</div></div><div class="card kpi e"><small>Heures à sec, plateforme sans marché</small><div class="num">${i.dry_hours_no_market}</div></div><div class="card kpi a"><small>Heures à sec, plateforme + marché</small><div class="num">${i.dry_hours_with}</div></div><div class="card kpi w"><small>Eau échangée</small><div class="num">${i.traded_m3} m³</div><small>${i.trades} échanges, taux moyen × ${fmt(i.avg_rate, 2)}</small></div></div>
+  <div class="card"><h2>Comparaison</h2><p class="sub">Rouge : sans plateforme. Vert : plateforme et marché de l'eau.</p><div class="cmp">${row("Eau manquante", i.unmet_without, i.unmet_with, "m³")}${row("Heures à sec", i.dry_hours_without, i.dry_hours_with, "h")}</div>
+  <p class="note" style="margin-top:14px">Le marché évite ${i.market_saved_m3} m³ d'eau manquante par rapport à la même plateforme sans échange (${i.unmet_no_market} m³ → ${i.unmet_with} m³). ${i.repaid_m3} m³ ont été rendus après les coupures.</p>
+  <p class="note">Chiffres issus de la simulation, pas de mesures réelles. Sans plateforme : une pompe qui démarre seulement sous 30 % de remplissage. Les données réelles viendront des capteurs ESP32 via l'API.</p></div>`;
 }
 
 boot();
