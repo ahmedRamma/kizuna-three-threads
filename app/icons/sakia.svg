@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Logo Sakia">
+  <defs>
+    <linearGradient id="sk-drop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e3f3fd"/>
+      <stop offset="1" stop-color="#bfe3f9"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 4C32 4 11.5 26.5 11.5 40.5a20.5 20.5 0 0 0 41 0C52.5 26.5 32 4 32 4Z" fill="url(#sk-drop)" stroke="#1a8cd8" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="22" y="27" width="20" height="23" rx="4" fill="#fff" stroke="#14283a" stroke-width="2.2"/>
+  <rect x="28.5" y="23.6" width="7" height="3.4" rx="1.4" fill="#14283a"/>
+  <rect x="25" y="37" width="4" height="10" rx="1.6" fill="#1a8cd8"/>
+  <rect x="30" y="32" width="4" height="15" rx="1.6" fill="#f0a020"/>
+  <rect x="35" y="35" width="4" height="12" rx="1.6" fill="#2e9e68"/>
+  <path d="M6 57c6-3.2 10.5-3.2 15 0s9.5 3.2 14 0 9.5-3.2 14 0 7.2 2.4 9 1.6" fill="none" stroke="#6cc3f2" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

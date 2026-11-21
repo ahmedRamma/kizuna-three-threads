@@ -1,0 +1,18 @@
+{
+  "name": "Sakia · La batterie virtuelle d'eau",
+  "short_name": "Sakia",
+  "description": "Batterie virtuelle d'eau pour les fermes pendant les coupures de courant.",
+  "lang": "fr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f4ee",
+  "theme_color": "#1a8cd8",
+  "icons": [
+    { "src": "/static/icons/sakia.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/static/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

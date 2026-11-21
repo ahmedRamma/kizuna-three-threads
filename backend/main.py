@@ -1,3 +1,4 @@
+import mimetypes
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI
@@ -13,8 +14,10 @@ async def lifespan(_):
     yield
 
 
-app = FastAPI(title="Kizuna - Batterie virtuelle d'eau", lifespan=lifespan)
+app = FastAPI(title="Sakia - La batterie virtuelle d'eau", lifespan=lifespan)
 APP_DIR = Path(__file__).resolve().parent.parent / "app"
+mimetypes.add_type("application/manifest+json", ".webmanifest")
+mimetypes.add_type("text/javascript", ".js")
 
 
 class Reading(BaseModel):
