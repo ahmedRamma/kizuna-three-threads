@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kizuna · Batterie virtuelle d'eau</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<aside class="side">
+  <div class="brand"><span class="logo"><i></i><i></i><i></i></span><div><b>Kizuna</b><small>Batterie virtuelle d'eau</small></div></div>
+  <nav id="nav">
+    <button data-v="overview" class="on">Vue d'ensemble</button>
+    <button data-v="farms">Fermes</button>
+    <button data-v="aid">Entraide</button>
+    <button data-v="analysis">Analyse mensuelle</button>
+    <button data-v="alerts">Alertes</button>
+    <button data-v="impact">Impact</button>
+  </nav>
+  <div class="threads"><span class="t water">Eau</span><span class="t energy">Énergie</span><span class="t agri">Agriculture</span></div>
+  <p class="foot">Zone pilote : Sfax Nord<br>Scénario canicule, 72 h</p>
+</aside>
+<main>
+  <header class="top">
+    <div class="clock">
+      <button id="play" class="round" aria-label="Lecture">▶</button>
+      <div class="when"><b id="when">Jour 1, 00 h</b><small id="whenSub"></small></div>
+      <input id="slider" type="range" min="0" max="71" value="0">
+    </div>
+    <div class="pills">
+      <span class="pill" id="pTemp"></span>
+      <span class="pill" id="pGrid"></span>
+      <span class="pill" id="pRisk"></span>
+    </div>
+  </header>
+  <section id="view"></section>
+</main>
+<script src="/static/app.js"></script>
+</body>
+</html>
