@@ -1,6 +1,18 @@
-# Kizuna · Batterie virtuelle d'eau
+<p align="center"><img src="app/icons/sakia.svg" width="96" alt="Logo Sakia"></p>
 
-Hackathon Kizuna (Tunisie / Japon). Thème : eau, énergie et agriculture comme un seul système.
+# Sakia · La batterie virtuelle d'eau
+
+La *sakia* est le canal d'eau traditionnel des jardins et des oasis de Tunisie. Sakia fait la même chose avec les cuves d'une zone : elle répartit l'eau pour qu'elle soit là quand le courant coupe.
+
+Projet né au hackathon Kizuna (Tunisie / Japon). Thème : eau, énergie et agriculture comme un seul système.
+
+**Compatible mobile** : interface pensée d'abord pour le téléphone, puis adaptée à la tablette et à l'ordinateur. Elle s'installe sur l'écran d'accueil comme une application (manifest web, icônes, mode sombre).
+
+<p align="center">
+  <img src="docs/screens/overview-mobile-light.png" width="240" alt="Vue d'ensemble sur téléphone, mode clair">
+  <img src="docs/screens/market-mobile-dark.png" width="240" alt="Marché de l'eau sur téléphone, mode sombre">
+  <img src="docs/screens/impact-mobile-light.png" width="240" alt="Impact sur téléphone, mode clair">
+</p>
 
 ## Problème
 Pendant une canicule, le réseau électrique coupe, les pompes s'arrêtent, les robinets sèchent et les agriculteurs perdent leur eau.
@@ -35,12 +47,35 @@ python -m uvicorn backend.main:app --port 8000
 ```
 Ouvrir http://localhost:8000. Tests : `python -m pytest`.
 
+## Interface
+- HTML, CSS et JavaScript simples (modules ES), sans framework ni étape de build.
+- `app/css/` : `tokens.css` (couleurs, rayons, ombres, espacements, tailles de texte, durées et courbes d'animation, thème sombre), `base.css` (mise en page), `components.css`, `motion.css`.
+- `app/js/` : `main.js` (navigation, thème, lecture sur 72 h), `views.js` (les six vues), `charts.js` (batterie, cuves, jauge, graphiques SVG), `icons.js`, `dom.js`.
+- Téléphone : navigation fixe en bas, barre de lecture du temps juste au-dessus, zones cliquables de 44 px, zones sûres (encoche, barre du bas) prises en compte. Ordinateur : barre latérale.
+- Mode sombre : bouton dans l'en-tête, choix mémorisé dans le navigateur, réglage du système respecté par défaut.
+- Animations : transitions entre vues, cartes en cascade, compteurs, eau qui monte avec une vague, courbe qui se dessine, jauge de risque, bandeau de coupure, gouttes qui circulent entre fermes. Elles sont coupées si `prefers-reduced-motion` est activé.
+- Lien direct vers une vue et une heure : `http://localhost:8000/?h=38#/market`.
+
+## Captures d'écran
+Chaque vue est capturée en 390×844 (téléphone), 820×1180 (tablette) et 1440×900 (ordinateur), en clair et en sombre : `docs/screens/<vue>-<appareil>-<thème>.png`.
+
+| Vue | Téléphone | Tablette | Ordinateur |
+|---|---|---|---|
+| Vue d'ensemble | [clair](docs/screens/overview-mobile-light.png) · [sombre](docs/screens/overview-mobile-dark.png) | [clair](docs/screens/overview-tablet-light.png) · [sombre](docs/screens/overview-tablet-dark.png) | [clair](docs/screens/overview-desktop-light.png) · [sombre](docs/screens/overview-desktop-dark.png) |
+| Fermes | [clair](docs/screens/farms-mobile-light.png) · [sombre](docs/screens/farms-mobile-dark.png) | [clair](docs/screens/farms-tablet-light.png) · [sombre](docs/screens/farms-tablet-dark.png) | [clair](docs/screens/farms-desktop-light.png) · [sombre](docs/screens/farms-desktop-dark.png) |
+| Marché de l'eau | [clair](docs/screens/market-mobile-light.png) · [sombre](docs/screens/market-mobile-dark.png) | [clair](docs/screens/market-tablet-light.png) · [sombre](docs/screens/market-tablet-dark.png) | [clair](docs/screens/market-desktop-light.png) · [sombre](docs/screens/market-desktop-dark.png) |
+| Analyse mensuelle | [clair](docs/screens/analysis-mobile-light.png) · [sombre](docs/screens/analysis-mobile-dark.png) | [clair](docs/screens/analysis-tablet-light.png) · [sombre](docs/screens/analysis-tablet-dark.png) | [clair](docs/screens/analysis-desktop-light.png) · [sombre](docs/screens/analysis-desktop-dark.png) |
+| Alertes | [clair](docs/screens/alerts-mobile-light.png) · [sombre](docs/screens/alerts-mobile-dark.png) | [clair](docs/screens/alerts-tablet-light.png) · [sombre](docs/screens/alerts-tablet-dark.png) | [clair](docs/screens/alerts-desktop-light.png) · [sombre](docs/screens/alerts-desktop-dark.png) |
+| Impact | [clair](docs/screens/impact-mobile-light.png) · [sombre](docs/screens/impact-mobile-dark.png) | [clair](docs/screens/impact-tablet-light.png) · [sombre](docs/screens/impact-tablet-dark.png) | [clair](docs/screens/impact-desktop-light.png) · [sombre](docs/screens/impact-desktop-dark.png) |
+
+![Vue d'ensemble sur ordinateur](docs/screens/overview-desktop-light.png)
+
 ## Structure
 - `simulator/` scénario de canicule sur 72 h, 8 fermes
 - `backend/engine.py` risque, autonomie, décisions, marché de l'eau, anomalies
 - `backend/db.py` base SQLite (fermes, mesures, alertes, compte d'eau, stats mensuelles)
 - `backend/main.py` API FastAPI (`/api/simulation`, `/api/analysis`, `/api/ingest`)
-- `app/` tableau de bord web
+- `app/` tableau de bord web Sakia (voir « Interface »)
 - `firmware/esp32_node/` code ESP32 optionnel qui envoie le niveau de cuve à `/api/ingest`
 - `docs/screens/` captures d'écran
 
