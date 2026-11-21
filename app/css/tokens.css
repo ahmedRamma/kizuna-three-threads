@@ -1,0 +1,135 @@
+:root {
+  color-scheme: light;
+  --c-water: #1a8cd8;
+  --c-water-2: #6cc3f2;
+  --c-water-ink: #0b6bab;
+  --c-water-soft: #e2f1fc;
+  --c-energy: #f0a020;
+  --c-energy-ink: #9a5b00;
+  --c-energy-soft: #fdf0d8;
+  --c-agri: #2e9e68;
+  --c-agri-ink: #1d7a4e;
+  --c-agri-soft: #dcf2e6;
+  --c-bad: #e0474c;
+  --c-bad-ink: #b8282e;
+  --c-bad-soft: #fde4e4;
+  --c-wa: #1faa59;
+  --c-sms: #2f74d0;
+
+  --bg: #f7f4ee;
+  --bg-grad: radial-gradient(1200px 600px at 100% -10%, #e4f2fc 0%, transparent 60%),
+             radial-gradient(900px 500px at -10% 110%, #fbeed6 0%, transparent 55%), #f7f4ee;
+  --surface: rgba(255, 255, 255, .78);
+  --surface-solid: #ffffff;
+  --surface-2: #f3efe8;
+  --ink: #14283a;
+  --mute: #5a6878;
+  --line: rgba(20, 40, 58, .09);
+  --track: #e9e4da;
+  --glass-blur: 14px;
+  --shine: rgba(255, 255, 255, .5);
+
+  --r-sm: 10px;
+  --r: 16px;
+  --r-lg: 24px;
+  --r-pill: 999px;
+
+  --sh-1: 0 1px 2px rgba(20, 40, 58, .05), 0 4px 14px rgba(20, 40, 58, .06);
+  --sh-2: 0 2px 6px rgba(20, 40, 58, .06), 0 14px 34px rgba(20, 40, 58, .10);
+  --sh-ring: 0 0 0 3px rgba(26, 140, 216, .35);
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --gutter: clamp(14px, 3.5vw, 32px);
+
+  --font-title: "Poppins", system-ui, sans-serif;
+  --font-text: "Inter", system-ui, sans-serif;
+  --fs-xs: .75rem;
+  --fs-sm: .8125rem;
+  --fs-base: clamp(.9rem, .87rem + .15vw, 1rem);
+  --fs-md: clamp(1rem, .95rem + .3vw, 1.125rem);
+  --fs-lg: clamp(1.15rem, 1rem + .6vw, 1.4rem);
+  --fs-xl: clamp(1.6rem, 1.25rem + 1.4vw, 2.25rem);
+  --fs-2xl: clamp(2.3rem, 1.7rem + 2.8vw, 3.6rem);
+
+  --dur-1: 160ms;
+  --dur-2: 320ms;
+  --dur-3: 700ms;
+  --dur-4: 1200ms;
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+
+  --tap: 44px;
+  --nav-h: 64px;
+  --clock-h: 64px;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --side-w: 252px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --c-water: #3aa6ef;
+    --c-water-2: #7fcdf6;
+    --c-water-ink: #8ccdf7;
+    --c-water-soft: rgba(58, 166, 239, .16);
+    --c-energy: #f5b343;
+    --c-energy-ink: #f7c46b;
+    --c-energy-soft: rgba(245, 179, 67, .15);
+    --c-agri: #3fbf83;
+    --c-agri-ink: #6fd8a4;
+    --c-agri-soft: rgba(63, 191, 131, .15);
+    --c-bad: #ff6166;
+    --c-bad-ink: #ff8a8e;
+    --c-bad-soft: rgba(255, 97, 102, .16);
+    --bg: #0d1620;
+    --bg-grad: radial-gradient(1200px 600px at 100% -10%, #12304a 0%, transparent 60%),
+               radial-gradient(900px 500px at -10% 110%, #2a2212 0%, transparent 55%), #0d1620;
+    --surface: rgba(22, 34, 47, .74);
+    --surface-solid: #16222f;
+    --surface-2: #1c2a39;
+    --ink: #e7eef5;
+    --mute: #9cadbe;
+    --line: rgba(255, 255, 255, .08);
+    --track: #243446;
+    --shine: rgba(255, 255, 255, .06);
+    --sh-1: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 14px rgba(0, 0, 0, .25);
+    --sh-2: 0 2px 6px rgba(0, 0, 0, .35), 0 14px 34px rgba(0, 0, 0, .35);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --c-water: #3aa6ef;
+  --c-water-2: #7fcdf6;
+  --c-water-ink: #8ccdf7;
+  --c-water-soft: rgba(58, 166, 239, .16);
+  --c-energy: #f5b343;
+  --c-energy-ink: #f7c46b;
+  --c-energy-soft: rgba(245, 179, 67, .15);
+  --c-agri: #3fbf83;
+  --c-agri-ink: #6fd8a4;
+  --c-agri-soft: rgba(63, 191, 131, .15);
+  --c-bad: #ff6166;
+  --c-bad-ink: #ff8a8e;
+  --c-bad-soft: rgba(255, 97, 102, .16);
+  --bg: #0d1620;
+  --bg-grad: radial-gradient(1200px 600px at 100% -10%, #12304a 0%, transparent 60%),
+             radial-gradient(900px 500px at -10% 110%, #2a2212 0%, transparent 55%), #0d1620;
+  --surface: rgba(22, 34, 47, .74);
+  --surface-solid: #16222f;
+  --surface-2: #1c2a39;
+  --ink: #e7eef5;
+  --mute: #9cadbe;
+  --line: rgba(255, 255, 255, .08);
+  --track: #243446;
+  --shine: rgba(255, 255, 255, .06);
+  --sh-1: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 14px rgba(0, 0, 0, .25);
+  --sh-2: 0 2px 6px rgba(0, 0, 0, .35), 0 14px 34px rgba(0, 0, 0, .35);
+}
